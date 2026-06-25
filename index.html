@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkewRisk — AI agents for emissions & climate risk</title>
+<meta name="description" content="SkewRisk builds AI agents that quantify greenhouse gas emissions and physical climate risk — wildfire, flood, and heat — at the property level, and recommend actions to reduce both.">
+<style>
+  :root {
+    --ink: #0f1419;
+    --ink-soft: #1a2129;
+    --slate: #2b3642;
+    --paper: #f5f3ee;
+    --paper-dim: #e4e0d6;
+    --signal: #4a9d92;      /* teal — the safe side of the distribution */
+    --tail: #e0913a;        /* amber — the risk tail */
+    --tail-deep: #c4621f;
+    --line: rgba(245,243,238,0.14);
+    --muted: rgba(245,243,238,0.62);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---- Typography ---- */
+  h1, h2, h3 {
+    font-weight: 680;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+  .display {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .eyebrow {
+    font-size: 0.74rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--signal);
+    font-weight: 600;
+  }
+
+  /* ---- Top bar ---- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,20,25,0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -0.01em; font-size: 1.05rem; }
+  .logo-mark { width: 26px; height: 26px; }
+  .nav a.cta {
+    color: var(--ink); background: var(--paper);
+    padding: 9px 18px; border-radius: 7px; text-decoration: none;
+    font-size: 0.9rem; font-weight: 600; transition: transform .15s ease, background .15s ease;
+  }
+  .nav a.cta:hover { background: #fff; transform: translateY(-1px); }
+
+  /* ---- Hero ---- */
+  .hero { padding: 92px 0 64px; position: relative; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; }
+  .hero h1 { font-size: clamp(2.4rem, 5vw, 3.7rem); margin: 20px 0 22px; }
+  .hero h1 .accent { color: var(--tail); font-style: italic; }
+  .hero p.lead { font-size: 1.18rem; color: var(--muted); max-width: 30ch; }
+  .hero-actions { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    text-decoration: none; padding: 13px 24px; border-radius: 8px; font-weight: 600; font-size: 0.96rem;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease; display: inline-block;
+  }
+  .btn-primary { background: var(--tail); color: var(--ink); }
+  .btn-primary:hover { background: var(--tail-deep); color: var(--paper); transform: translateY(-1px); }
+  .btn-ghost { border: 1px solid var(--line); color: var(--paper); }
+  .btn-ghost:hover { border-color: var(--signal); color: var(--signal); }
+
+  /* ---- The signature: distribution curve ---- */
+  .dist { width: 100%; height: auto; }
+  .dist-caption {
+    font-size: 0.8rem; color: var(--muted); margin-top: 14px; text-align: center;
+    font-family: "Georgia", serif; font-style: italic;
+  }
+
+  /* ---- Section scaffolding ---- */
+  section.band { padding: 76px 0; border-top: 1px solid var(--line); }
+  .band-head { max-width: 60ch; margin-bottom: 48px; }
+  .band-head h2 { font-size: clamp(1.7rem, 3.5vw, 2.4rem); margin: 14px 0 16px; }
+  .band-head p { color: var(--muted); font-size: 1.08rem; }
+
+  /* ---- What it does: three agents ---- */
+  .agents { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .agent {
+    background: var(--ink-soft); border: 1px solid var(--line); border-radius: 12px;
+    padding: 28px 24px; position: relative; overflow: hidden;
+  }
+  .agent::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--signal);
+  }
+  .agent:nth-child(2)::before { background: var(--tail); }
+  .agent:nth-child(3)::before { background: var(--paper-dim); }
+  .agent .num { font-family: "Georgia", serif; font-size: 0.85rem; color: var(--muted); }
+  .agent h3 { font-size: 1.18rem; margin: 10px 0 10px; }
+  .agent p { color: var(--muted); font-size: 0.96rem; }
+
+  /* ---- How it works ---- */
+  .pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 8px; }
+  .step { padding: 22px 18px 22px 0; position: relative; }
+  .step .s-label { font-family: "Georgia", serif; font-size: 0.8rem; color: var(--tail); margin-bottom: 8px; }
+  .step h4 { font-size: 1.02rem; margin-bottom: 7px; font-weight: 650; }
+  .step p { font-size: 0.88rem; color: var(--muted); }
+  .step:not(:last-child)::after {
+    content: "→"; position: absolute; right: 12px; top: 22px; color: var(--line); font-size: 1.1rem;
+  }
+  .stack-note {
+    margin-top: 40px; padding: 20px 24px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--ink-soft); font-size: 0.94rem; color: var(--muted);
+  }
+  .stack-note strong { color: var(--paper); font-weight: 650; }
+  .chips { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 0.8rem; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--line); color: var(--paper); background: rgba(74,157,146,0.08);
+  }
+
+  /* ---- Output gallery ---- */
+  .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .shot {
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--ink-soft);
+  }
+  .shot .ph {
+    aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a2129 0%, #232d38 100%);
+    color: var(--muted); font-size: 0.85rem; text-align: center; padding: 16px;
+  }
+  .shot .cap { padding: 14px 16px; font-size: 0.88rem; color: var(--muted); border-top: 1px solid var(--line); }
+  .shot img { width: 100%; height: auto; display: block; }
+
+  /* ---- Who it's for ---- */
+  .for-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 40px; max-width: 800px; }
+  .for-item { display: flex; gap: 14px; align-items: flex-start; }
+  .for-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tail); margin-top: 9px; flex-shrink: 0; }
+  .for-item p { color: var(--muted); }
+  .for-item strong { color: var(--paper); font-weight: 650; }
+
+  /* ---- Founder ---- */
+  .founder { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 70ch; }
+  .founder p { color: var(--muted); font-size: 1.05rem; }
+  .founder p strong { color: var(--paper); font-weight: 650; }
+
+  /* ---- Contact ---- */
+  .contact-band { background: var(--ink-soft); border-top: 1px solid var(--line); }
+  .contact-inner { text-align: center; padding: 8px 0; }
+  .contact-inner h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 16px; }
+  .contact-inner p { color: var(--muted); font-size: 1.1rem; margin-bottom: 28px; }
+  .mailbtn {
+    display: inline-block; background: var(--tail); color: var(--ink); text-decoration: none;
+    padding: 15px 32px; border-radius: 9px; font-weight: 650; font-size: 1.02rem;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .mailbtn:hover { background: var(--tail-deep); color: var(--paper); transform: translateY(-1px); }
+
+  /* ---- Footer ---- */
+  footer { border-top: 1px solid var(--line); padding: 32px 0; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .foot p { font-size: 0.84rem; color: var(--muted); }
+  .foot a { color: var(--muted); text-decoration: none; }
+  .foot a:hover { color: var(--signal); }
+
+  /* ---- Reveal animation ---- */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .hero { padding: 56px 0 48px; }
+    .hero p.lead { max-width: none; }
+    .agents { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: 1fr 1fr; }
+    .step:not(:last-child)::after { display: none; }
+    .shots { grid-template-columns: 1fr; }
+    .for-list { grid-template-columns: 1fr; }
+    .nav a.cta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2 30 Q12 30 17 18 Q20 10 23 14 Q26 18 30 28 Q33 33 38 33" stroke="#4a9d92" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M30 28 Q33 33 38 33 L38 36 Q32 36 29 31 Z" fill="#e0913a"/>
+        <circle cx="34" cy="32" r="2.2" fill="#e0913a"/>
+      </svg>
+      SkewRisk
+    </div>
+    <a href="#contact" class="cta">Get in touch</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Emissions &amp; climate risk, quantified</span>
+      <h1 class="display">Every portfolio has a <span class="accent">tail</span>. We find it.</h1>
+      <p class="lead">SkewRisk builds AI agents that measure greenhouse gas emissions and physical climate risk — wildfire, flood, heat — property by property, then recommend what to do about both.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">Request a demo</a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
+      </div>
+    </div>
+    <div>
+      <!-- SIGNATURE: a risk distribution with a highlighted tail -->
+      <svg class="dist" viewBox="0 0 440 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A risk distribution curve with the high-loss tail highlighted in amber.">
+        <defs>
+          <linearGradient id="fillSignal" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4a9d92" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#4a9d92" stop-opacity="0.02"/>
+          </linearGradient>
+          <linearGradient id="fillTail" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e0913a" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#e0913a" stop-opacity="0.04"/>
+          </linearGradient>
+        </defs>
+        <!-- baseline -->
+        <line x1="20" y1="240" x2="420" y2="240" stroke="rgba(245,243,238,0.18)" stroke-width="1"/>
+        <!-- main body fill -->
+        <path d="M20 240 Q70 240 120 232 Q175 222 210 120 Q230 60 250 120 Q280 200 320 232 L320 240 Z" fill="url(#fillSignal)"/>
+        <!-- tail fill (beyond x=320) -->
+        <path d="M320 240 Q345 232 365 210 Q390 182 410 175 L410 240 Z" fill="url(#fillTail)"/>
+        <!-- curve stroke -->
+        <path d="M20 240 Q70 240 120 232 Q175 222 210 120 Q230 60 250 120 Q280 200 320 232 Q345 232 365 210 Q390 182 410 175"
+              fill="none" stroke="#4a9d92" stroke-width="2.6" stroke-linecap="round"/>
+        <!-- tail threshold marker -->
+        <line x1="320" y1="80" x2="320" y2="240" stroke="rgba(224,145,58,0.55)" stroke-width="1.4" stroke-dasharray="4 4"/>
+        <circle cx="395" cy="186" r="4.5" fill="#e0913a"/>
+        <text x="332" y="74" fill="#e0913a" font-size="12" font-family="Georgia, serif" font-style="italic">the asset</text>
+        <text x="332" y="90" fill="#e0913a" font-size="12" font-family="Georgia, serif" font-style="italic">carrying the risk</text>
+      </svg>
+      <p class="dist-caption">Most assets sit in the body. The exposure hides in the tail.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT DOES -->
+<section class="band" id="what">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">What it does</span>
+      <h2 class="display">Three agents, one report.</h2>
+      <p>You hand SkewRisk your portfolio data. A pipeline of specialized AI agents cleans it, measures it, and tells you where the risk actually lives.</p>
+    </div>
+    <div class="agents">
+      <div class="agent reveal">
+        <span class="num">Agent 01</span>
+        <h3>Validate</h3>
+        <p>Before anything is calculated, a data agent flags what it doesn't trust — missing units, anomalies, undocumented assumptions. A confident wrong number is worse than no number.</p>
+      </div>
+      <div class="agent reveal">
+        <span class="num">Agent 02</span>
+        <h3>Quantify emissions</h3>
+        <p>Scope 1 and 2 emissions computed with localized grid factors, by property, with every assumption documented for disclosure and third-party verification.</p>
+      </div>
+      <div class="agent reveal">
+        <span class="num">Agent 03</span>
+        <h3>Score the risk</h3>
+        <p>Property-level wildfire, flood, and heat exposure from public hazard data — ranked across the portfolio to surface the assets quietly carrying the most risk.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="band" id="how">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2 class="display">From a messy spreadsheet to a decision.</h2>
+      <p>An agentic pipeline, not an LLM bolted onto a dashboard. Each step hands clean, checked work to the next.</p>
+    </div>
+    <div class="pipeline">
+      <div class="step reveal">
+        <div class="s-label">Step 1</div>
+        <h4>Ingest</h4>
+        <p>Upload property data in whatever shape it arrives — utility figures, addresses, fuel use.</p>
+      </div>
+      <div class="step reveal">
+        <div class="s-label">Step 2</div>
+        <h4>Clean &amp; check</h4>
+        <p>The validation agent resolves gaps and flags what needs a human eye.</p>
+      </div>
+      <div class="step reveal">
+        <div class="s-label">Step 3</div>
+        <h4>Compute</h4>
+        <p>Emissions and address-level climate risk scored against authoritative public data.</p>
+      </div>
+      <div class="step reveal">
+        <div class="s-label">Step 4</div>
+        <h4>Report</h4>
+        <p>A structured, citable report — emissions, tail-risk ranking, and recommended actions.</p>
+      </div>
+    </div>
+    <div class="stack-note reveal">
+      <strong>Under the hood.</strong> A multi-agent system orchestrated with LangGraph and Claude, drawing on public emissions and hazard datasets. Built to make expert judgment about where data breaks down repeatable — and the output reliable enough to act on.
+      <div class="chips">
+        <span class="chip">Multi-agent / LangGraph</span>
+        <span class="chip">Claude</span>
+        <span class="chip">eGRID factors</span>
+        <span class="chip">FEMA &amp; NOAA hazard data</span>
+        <span class="chip">GHG Protocol · TCFD-aligned</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTPUT -->
+<section class="band" id="output">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">The output</span>
+      <h2 class="display">A report, not a dashboard to manage.</h2>
+      <p>Something you can hand to a board, an auditor, or an investment committee.</p>
+    </div>
+    <div class="shots">
+      <div class="shot reveal">
+        <img src="screenshot1.png" alt="Portfolio emissions summary">
+        <div class="cap">Portfolio emissions, broken down by scope and property.</div>
+      </div>
+      <div class="shot reveal">
+        <img src="screenshot2.png" alt="Portfolio Risk Table">
+        <div class="cap">Address-level wildfire, flood, and heat scores with a tail-risk ranking.</div>
+      </div>
+      <div class="shot reveal">
+        <img src="screenshot3.png" alt="Portfolio Recommendation">
+        <div class="cap">Prioritized actions to cut emissions and reduce exposure.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="band" id="who">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Who it's for</span>
+      <h2 class="display">Built for the people who own the answer.</h2>
+    </div>
+    <div class="for-list">
+      <div class="for-item reveal"><span class="dot"></span><p><strong>Real estate &amp; REIT portfolios</strong> facing emissions disclosure and rising physical risk across many properties.</p></div>
+      <div class="for-item reveal"><span class="dot"></span><p><strong>Sustainability &amp; ESG teams</strong> who need forward-looking numbers, not just last year's report.</p></div>
+      <div class="for-item reveal"><span class="dot"></span><p><strong>Asset &amp; risk managers</strong> who need to know which holdings carry concentrated climate exposure.</p></div>
+      <div class="for-item reveal"><span class="dot"></span><p><strong>Teams preparing for disclosure</strong> under frameworks like SB&#8209;253, TCFD, and similar regimes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section class="band" id="founder">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Behind SkewRisk</span>
+      <h2 class="display">Domain depth meets hands-on AI.</h2>
+    </div>
+    <div class="founder reveal">
+      <p>SkewRisk is built by <strong>Vahid Shabro, PhD</strong> — a product leader with fifteen years across energy, emissions, and climate. He built ComboCarbon at ComboCurve from inception, led GHG and climate-risk strategy at bp, and has spent his recent work hands-on in agentic AI.</p>
+      <p>The conviction behind SkewRisk is simple: in emissions and risk work, the calculation was never the hard part. The hard part is knowing when the data is wrong, and turning that judgment into something a team can trust at scale. That's what the agents are for.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="band contact-band" id="contact">
+  <div class="wrap contact-inner reveal">
+    <span class="eyebrow">Get in touch</span>
+    <h2 class="display">See it on your portfolio.</h2>
+    <p>Walk through a sample analysis, or talk through whether SkewRisk fits your data.</p>
+    <a class="mailbtn" href="mailto:vahid@skewrisk.com?subject=SkewRisk%20%E2%80%94%20demo%20request">vahid@skewrisk.com</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <p>© <span id="yr"></span> SkewRisk</p>
+    <p><a href="mailto:vahid@skewrisk.com">vahid@skewrisk.com</a></p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  // Scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
