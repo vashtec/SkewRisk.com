@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>If AI Can Build Anything, What's Left? — SkewRisk</title>
+<meta name="description" content="A field guide to adopting AI without lighting money on fire — from someone who's seen it done both ways. On moats, the predictable ways AI adoption fails, and the double standard nobody talks about.">
+<style>
+  :root {
+    --ink: #0f1419;
+    --ink-soft: #1a2129;
+    --slate: #2b3642;
+    --paper: #f5f3ee;
+    --paper-dim: #e4e0d6;
+    --signal: #4a9d92;
+    --tail: #e0913a;
+    --tail-deep: #c4621f;
+    --line: rgba(245,243,238,0.14);
+    --muted: rgba(245,243,238,0.64);
+    --muted-soft: rgba(245,243,238,0.48);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 28px; }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,20,25,0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 760px; margin: 0 auto; padding: 0 28px; }
+  .logo { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -0.01em; font-size: 1.05rem; color: var(--paper); text-decoration: none; }
+  .logo-mark { width: 26px; height: 26px; }
+  .nav a.back { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color .15s ease; }
+  .nav a.back:hover { color: var(--signal); }
+
+  /* Article */
+  article { padding: 64px 0 40px; }
+  .eyebrow {
+    font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--signal); font-weight: 600; margin-bottom: 20px;
+  }
+  h1.title {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-weight: 600; font-size: clamp(2.1rem, 5vw, 3.1rem);
+    line-height: 1.1; letter-spacing: -0.015em; margin-bottom: 18px;
+  }
+  h1.title .accent { color: var(--tail); font-style: italic; }
+  p.standfirst {
+    font-size: 1.18rem; color: var(--muted); line-height: 1.5;
+    border-left: 2px solid var(--tail); padding-left: 20px; margin-bottom: 14px;
+  }
+  .byline { font-size: 0.92rem; color: var(--muted-soft); margin-bottom: 8px; }
+
+  /* Body prose */
+  .body { margin-top: 48px; }
+  .body h2 {
+    font-family: "Georgia", serif; font-weight: 600;
+    font-size: clamp(1.5rem, 3vw, 1.9rem); letter-spacing: -0.01em;
+    margin: 56px 0 18px; line-height: 1.2;
+  }
+  .body p { font-size: 1.08rem; color: var(--paper); margin-bottom: 22px; }
+  .body p.muted { color: var(--muted); }
+  .body strong { color: var(--paper); font-weight: 650; }
+  .body em { font-style: italic; }
+  .lead-in {
+    font-size: 1.2rem !important; color: var(--muted) !important;
+  }
+
+  /* Pull quote */
+  .pull {
+    font-family: "Georgia", serif; font-size: 1.45rem; line-height: 1.4;
+    color: var(--tail); font-style: italic;
+    margin: 44px 0; padding: 4px 0 4px 24px; border-left: 3px solid var(--tail);
+  }
+
+  /* Figures */
+  figure { margin: 44px 0; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 0.86rem; color: var(--muted-soft); text-align: center; margin-top: 14px; font-style: italic; }
+  .fig-card {
+    background: var(--ink-soft); border: 1px solid var(--line);
+    border-radius: 14px; padding: 28px 24px;
+  }
+
+  /* SVG figure text styling */
+  .svg-t { font-size: 14px; font-weight: 600; }
+  .svg-ts { font-size: 12.5px; }
+  .svg-sub { font-size: 12.5px; }
+
+  /* Divider */
+  .rule { border: none; border-top: 1px solid var(--line); margin: 8px 0; }
+
+  /* Close / CTA */
+  .close-band {
+    margin-top: 60px; padding: 40px; background: var(--ink-soft);
+    border: 1px solid var(--line); border-radius: 16px;
+  }
+  .close-band p { font-size: 1.08rem; }
+  .close-band p:last-child { margin-bottom: 0; }
+  .mailrow { margin-top: 28px; }
+  .mailbtn {
+    display: inline-block; background: var(--tail); color: var(--ink); text-decoration: none;
+    padding: 13px 26px; border-radius: 9px; font-weight: 650; font-size: 1rem;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .mailbtn:hover { background: var(--tail-deep); color: var(--paper); transform: translateY(-1px); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--line); padding: 32px 0; margin-top: 64px; }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .foot p { font-size: 0.84rem; color: var(--muted-soft); }
+  .foot a { color: var(--muted); text-decoration: none; }
+  .foot a:hover { color: var(--signal); }
+
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  @media (max-width: 640px) {
+    article { padding: 44px 0 32px; }
+    .close-band { padding: 28px 22px; }
+    .pull { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2 30 Q12 30 17 18 Q20 10 23 14 Q26 18 30 28 Q33 33 38 33" stroke="#4a9d92" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M30 28 Q33 33 38 33 L38 36 Q32 36 29 31 Z" fill="#e0913a"/>
+        <circle cx="34" cy="32" r="2.2" fill="#e0913a"/>
+      </svg>
+      SkewRisk
+    </a>
+    <a href="index.html" class="back">← Back to home</a>
+  </div>
+</header>
+
+<article>
+  <div class="wrap">
+    <div class="eyebrow">Insights</div>
+    <h1 class="title">If AI Can Build Anything, What's <span class="accent">Left</span>?</h1>
+    <p class="standfirst">A field guide to adopting AI without lighting money on fire — from someone who's seen it done both ways.</p>
+    <p class="byline">By Vahid Shabro</p>
+
+    <div class="body">
+
+      <p class="lead-in">For most of business history, the hard part was building the thing. Writing the software, modeling the data, designing the system — these took specialists, time, and money, and that difficulty was a kind of protection. If something was hard to build, your competitors couldn't easily copy it.</p>
+
+      <p>That protection is largely gone.</p>
+
+      <p>AI has made implementation almost free. A capable person with the right tools can now build, in a weekend, what used to take a team a quarter. This is genuinely exciting, and most of the coverage stops there — at the opportunity. But if you run an established business, the more important implication is the uncomfortable one: <strong>if you can build it in a weekend, so can the person trying to take your customers.</strong> The thing you spent years and millions building can be approximated by a newcomer with a subscription and a clear afternoon.</p>
+
+      <p>So the strategic question for an established company is no longer "how do we build impressive technology?" Building is commoditized. The question is: <em>when building is free, what actually protects you?</em></p>
+
+      <h2>What survives: the moat</h2>
+
+      <p>The answer is the same thing that has always protected businesses, just thrown into sharper relief. It's the moat — the thing about your business that AI <em>cannot</em> hand to a competitor for free. In practice, it's one of four things:</p>
+
+      <p><strong>Proprietary data</strong> that no one else has and no one else can easily recreate. <strong>Hard-won expertise</strong> — judgment built over years that isn't written down anywhere a model could have learned it. <strong>An established book of paying customers</strong> and the trust relationships underneath it. Or <strong>something that requires a physical or human touch</strong> that software can't replicate.</p>
+
+      <p>If you have one of these, you have a real business in the AI era. But here's the part that surprises people, and it's the whole point of this piece:</p>
+
+      <p class="pull">If you have a moat, you have to be the one who applies AI to it first — because the moat is exactly what stops someone else's AI from eating you, but only if you move before they do.</p>
+
+      <p>AI applied <em>on top of</em> a genuine moat compounds your advantage. The same AI, applied by a competitor <em>against</em> an undefended moat, erodes it. The technology is neutral; the moat decides who it helps.</p>
+
+      <figure class="reveal">
+        <div class="fig-card">
+          <svg viewBox="0 0 680 400" role="img" xmlns="http://www.w3.org/2000/svg">
+            <title>The core thesis: building is now free, so the moat is what survives, and the moat forces you to adopt AI first.</title>
+            <defs>
+              <marker id="arrow1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            </defs>
+            <g>
+              <rect x="140" y="30" width="400" height="60" rx="12" fill="rgba(245,243,238,0.06)" stroke="rgba(245,243,238,0.28)" stroke-width="0.5"/>
+              <text class="svg-t" x="340" y="54" text-anchor="middle" dominant-baseline="central" fill="#f5f3ee">AI made building almost free</text>
+              <text class="svg-sub" x="340" y="74" text-anchor="middle" dominant-baseline="central" fill="rgba(245,243,238,0.62)">Execution is no longer a moat</text>
+            </g>
+            <line x1="340" y1="90" x2="340" y2="130" stroke="rgba(245,243,238,0.4)" stroke-width="1.5" marker-end="url(#arrow1)"/>
+            <g>
+              <rect x="140" y="130" width="400" height="60" rx="12" fill="rgba(74,157,146,0.14)" stroke="#4a9d92" stroke-width="0.5"/>
+              <text class="svg-t" x="340" y="154" text-anchor="middle" dominant-baseline="central" fill="#f5f3ee">The moat is what survives</text>
+              <text class="svg-sub" x="340" y="174" text-anchor="middle" dominant-baseline="central" fill="rgba(157,225,203,0.9)">Data, expertise, clients, physical touch</text>
+            </g>
+            <line x1="340" y1="190" x2="340" y2="230" stroke="rgba(245,243,238,0.4)" stroke-width="1.5" marker-end="url(#arrow1)"/>
+            <g>
+              <rect x="140" y="230" width="400" height="60" rx="12" fill="rgba(224,145,58,0.16)" stroke="#e0913a" stroke-width="1"/>
+              <text class="svg-t" x="340" y="254" text-anchor="middle" dominant-baseline="central" fill="#f5f3ee">So you must apply AI to your moat first</text>
+              <text class="svg-sub" x="340" y="274" text-anchor="middle" dominant-baseline="central" fill="#f0c79a">Before a competitor's AI erodes it</text>
+            </g>
+            <text class="svg-ts" x="340" y="330" text-anchor="middle" fill="rgba(245,243,238,0.64)">Apply AI on top of your moat and it compounds.</text>
+            <text class="svg-ts" x="340" y="352" text-anchor="middle" fill="rgba(245,243,238,0.64)">Leave the moat undefended and the same AI erodes it.</text>
+          </svg>
+        </div>
+      </figure>
+
+      <p>Consider the consulting industry. Its moat is expertise and relationships — precisely the kind of thing you'd think AI threatens. And yet the serious firms aren't waiting to find out. They're racing to put AI <em>inside</em> their own work — faster research, better synthesis, more analysis per consultant — so that AI makes their expertise moat deeper instead of letting some AI-native upstart undercut it. That's the move. Not "should we use AI," but "how fast can we apply it to the thing we're already good at, before someone applies it against us."</p>
+
+      <p>So if you take one thing from this piece: the danger isn't that AI makes your moat irrelevant. The danger is sitting on your moat while someone else brings AI to the fight first.</p>
+
+      <h2>Why it goes wrong</h2>
+
+      <p>Here's where it gets practical, because deciding to adopt AI is the easy part. Doing it well is where most companies lose money, and the failures are remarkably predictable. I've watched them happen up close for years. They fall into a few recognizable patterns.</p>
+
+      <figure class="reveal">
+        <div class="fig-card">
+          <svg viewBox="0 0 680 340" role="img" xmlns="http://www.w3.org/2000/svg">
+            <title>The four predictable ways AI adoption fails: removing the human margin, selling beyond the physics, chasing cost over value, and automating a broken process.</title>
+            <g>
+              <rect x="40" y="40" width="290" height="110" rx="12" fill="rgba(216,90,48,0.13)" stroke="#d85a30" stroke-width="0.5"/>
+              <text class="svg-t" x="60" y="70" dominant-baseline="central" fill="#f5f3ee">Removing the human margin</text>
+              <text class="svg-sub" x="60" y="96" dominant-baseline="central" fill="rgba(245,243,238,0.64)">Cut staff on the model's word, then</text>
+              <text class="svg-sub" x="60" y="114" dominant-baseline="central" fill="rgba(245,243,238,0.64)">an edge case hits with no one to</text>
+              <text class="svg-sub" x="60" y="132" dominant-baseline="central" fill="rgba(245,243,238,0.64)">catch it.</text>
+            </g>
+            <g>
+              <rect x="350" y="40" width="290" height="110" rx="12" fill="rgba(216,90,48,0.13)" stroke="#d85a30" stroke-width="0.5"/>
+              <text class="svg-t" x="370" y="70" dominant-baseline="central" fill="#f5f3ee">Selling beyond the physics</text>
+              <text class="svg-sub" x="370" y="96" dominant-baseline="central" fill="rgba(245,243,238,0.64)">Claiming sensitivity the sensor</text>
+              <text class="svg-sub" x="370" y="114" dominant-baseline="central" fill="rgba(245,243,238,0.64)">can't support. Hallucinated results</text>
+              <text class="svg-sub" x="370" y="132" dominant-baseline="central" fill="rgba(245,243,238,0.64)">no one can act on.</text>
+            </g>
+            <g>
+              <rect x="40" y="170" width="290" height="110" rx="12" fill="rgba(216,90,48,0.13)" stroke="#d85a30" stroke-width="0.5"/>
+              <text class="svg-t" x="60" y="200" dominant-baseline="central" fill="#f5f3ee">Chasing cost over value</text>
+              <text class="svg-sub" x="60" y="226" dominant-baseline="central" fill="rgba(245,243,238,0.64)">Aiming to replace people instead</text>
+              <text class="svg-sub" x="60" y="244" dominant-baseline="central" fill="rgba(245,243,238,0.64)">of doing one thing more reliably.</text>
+              <text class="svg-sub" x="60" y="262" dominant-baseline="central" fill="rgba(245,243,238,0.64)">Budget burns; humans rehired.</text>
+            </g>
+            <g>
+              <rect x="350" y="170" width="290" height="110" rx="12" fill="rgba(216,90,48,0.13)" stroke="#d85a30" stroke-width="0.5"/>
+              <text class="svg-t" x="370" y="200" dominant-baseline="central" fill="#f5f3ee">Automating a broken process</text>
+              <text class="svg-sub" x="370" y="226" dominant-baseline="central" fill="rgba(245,243,238,0.64)">AI doesn't fix the flaw. It scales</text>
+              <text class="svg-sub" x="370" y="244" dominant-baseline="central" fill="rgba(245,243,238,0.64)">it faster, with a veneer that hides</text>
+              <text class="svg-sub" x="370" y="262" dominant-baseline="central" fill="rgba(245,243,238,0.64)">the real problem.</text>
+            </g>
+            <text class="svg-ts" x="340" y="312" text-anchor="middle" fill="rgba(245,243,238,0.64)">Each one is predictable — which means each one is avoidable.</text>
+          </svg>
+        </div>
+      </figure>
+
+      <p><strong>Removing the human margin.</strong> A company applies AI to optimize an operation — and it works, in normal conditions. Encouraged, they cut the human staff the AI seemed to make redundant. Then reality serves up a situation the model never saw in its training data — an unusual weather event, an edge case, a once-in-a-decade disruption — and the system fails exactly when it matters most, with no human expertise left to catch it. I've seen this cost an operation months of downtime, followed by an expensive scramble to rehire the very people who'd been let go. The lesson isn't that the AI was bad. It's that they removed the human margin <em>before the system had earned that trust</em>, leaving no slack when the model hit its limits.</p>
+
+      <p><strong>Selling beyond the physics.</strong> This one is rampant, and it's seductive because it sounds like the movies — the scene where someone enhances a blurry photo ten times over and suddenly reads the newspaper in a reflection. Science fiction sold, hallucination delivered.</p>
+
+      <p>Take methane detection from satellites, an area I know well. The sensors have a real, physical detection floor — they reliably see leaks down to a few hundred kilograms per hour, and below that, detection degrades sharply. That's physics, not a software limitation. But some vendors claim AI lets them see leaks an order of magnitude smaller than the sensor was designed to detect. What you actually get at those scales is the model inventing plumes from clouds, rivers, soil moisture, and wind artifacts — confident images of emissions that aren't there. Operators get sent to find a leak, climb the equipment, and find nothing. The technology overpromised, the human downstream paid for it, and trust in the whole approach erodes.</p>
+
+      <figure class="reveal">
+        <div class="fig-card">
+          <svg viewBox="0 0 680 380" role="img" xmlns="http://www.w3.org/2000/svg">
+            <title>Sensor detection floor versus vendor claims. Above about 200 to 300 kilograms per hour, detection is reliable. Below it, vendor claims produce false positives operators cannot find.</title>
+            <text class="svg-t" x="40" y="26" dominant-baseline="central" fill="#f5f3ee">Leak size the sensor can actually see</text>
+            <g>
+              <rect x="40" y="50" width="380" height="90" rx="12" fill="rgba(74,157,146,0.14)" stroke="#4a9d92" stroke-width="0.5"/>
+              <text class="svg-t" x="60" y="78" dominant-baseline="central" fill="#f5f3ee">Reliable detection</text>
+              <text class="svg-sub" x="60" y="102" dominant-baseline="central" fill="rgba(157,225,203,0.9)">Above ~200–300 kg/h, real plumes are</text>
+              <text class="svg-sub" x="60" y="120" dominant-baseline="central" fill="rgba(157,225,203,0.9)">found consistently. This is physics.</text>
+            </g>
+            <line x1="40" y1="155" x2="420" y2="155" stroke="#e0913a" stroke-width="1.5" stroke-dasharray="5 5"/>
+            <text class="svg-ts" x="430" y="155" dominant-baseline="central" fill="#e0913a">The detection floor</text>
+            <g>
+              <rect x="40" y="170" width="380" height="100" rx="12" fill="rgba(224,145,58,0.16)" stroke="#e0913a" stroke-width="1"/>
+              <text class="svg-t" x="60" y="198" dominant-baseline="central" fill="#f5f3ee">Below the floor: the hallucination zone</text>
+              <text class="svg-sub" x="60" y="222" dominant-baseline="central" fill="#f0c79a">Vendors claim sensitivity 10x smaller.</text>
+              <text class="svg-sub" x="60" y="240" dominant-baseline="central" fill="#f0c79a">What you get: clouds, rivers, and wind</text>
+              <text class="svg-sub" x="60" y="258" dominant-baseline="central" fill="#f0c79a">read as plumes that aren't there.</text>
+            </g>
+            <text class="svg-ts" x="40" y="305" dominant-baseline="central" fill="rgba(245,243,238,0.64)">Operators are sent to find leaks that don't exist —</text>
+            <text class="svg-ts" x="40" y="325" dominant-baseline="central" fill="rgba(245,243,238,0.64)">and trust in the whole approach erodes.</text>
+            <text class="svg-ts" x="40" y="352" dominant-baseline="central" fill="#e0913a" font-style="italic">Science fiction sold. Hallucination delivered.</text>
+          </svg>
+        </div>
+      </figure>
+
+      <p>To be clear, the same technology <em>done right</em> is genuinely valuable — operationally deployed methane detection has flagged thousands of real emission events and driven verified, permanent fixes to major leaks. The failure isn't the AI. The failure is selling capability beyond what the underlying physics supports, and not having anyone in the room with the expertise to know the difference.</p>
+
+      <p><strong>Chasing cost over value.</strong> The most expensive AI projects are often the ones aimed at "replacing people" rather than at a specific, well-defined improvement. Teams burn enormous sums building and running systems to automate work that a person was doing reliably and cheaply — and quietly rehire humans once the true cost, including the failures and the oversight, becomes clear. The right question is never "where can AI replace headcount?" It's "where does AI do something <em>more reliably and more cheaply</em> than the alternative?" Those are different questions, and the first one is where the money goes to die.</p>
+
+      <p><strong>Automating a broken process.</strong> AI applied to a process that was flawed to begin with doesn't fix the flaw — it scales it, faster and at greater volume, while wrapping it in a veneer of sophistication that makes the underlying problem harder to see.</p>
+
+      <h2>The double standard nobody talks about</h2>
+
+      <p>Now the insight I most want you to walk away with, because it quietly drives a lot of bad decisions.</p>
+
+      <p><strong>We hold AI to a standard of perfection we have never held humans to.</strong></p>
+
+      <p>I've seen a major emitter report its emissions wrong by a factor of one hundred — for <em>years</em> — because someone mixed up a percentage and a fraction in a single formula. I've seen an engineer run an entire analysis off the wrong column of data, throwing off every downstream number. I've seen a company simply forget to report an entire category of emissions for a year. Every one of these was waved off as "human error" — unfortunate, understandable, move on.</p>
+
+      <p>But imagine an AI system had made any one of those mistakes. The reaction would not have been "AI error, understandable, move on." It would have been "see, AI doesn't work." We forgive the human and condemn the machine for identical mistakes.</p>
+
+      <p>This asymmetry is not harmless. It causes two opposite and equally expensive errors. On one side, companies reject AI that is <em>better than the human baseline but not perfect</em> — throwing away real gains because the technology made a visible mistake a human would have been forgiven for. On the other side, companies trust AI <em>blindly</em> in exactly the places where they'd have instinctively double-checked a human, because the machine's confidence reads as authority. Both are failures of judgment, and they come from the same unexamined reflex: measuring AI against perfection instead of against the realistic alternative.</p>
+
+      <p>The job — and this is genuinely hard — is to hold AI and humans to the <em>same</em> honest standard. Better than the alternative, deployed where it's reliable, checked where it isn't.</p>
+
+      <h2>What "done right" looks like</h2>
+
+      <p>It's not all cautionary tales. When AI is pointed at the right problem by someone who understands both the technology and the domain, the results can be remarkable.</p>
+
+      <p>I once helped take over an asset where the previous owner's models had been effectively lost — the documentation was gone, the code wouldn't even run. Rather than try to rebuild years of work from scratch, I used the one thing we did have: the raw input data and the known outputs those old models had produced. I trained a neural network to reproduce the relationship between them — reverse-engineering a lost model from its own fingerprints. AI recovered something that would otherwise have been gone. But notice: it worked only because I knew what the model was <em>supposed</em> to do. The AI was the tool; the domain judgment was what made it the right tool.</p>
+
+      <p>Sometimes expertise means using <em>less</em> AI, not more. Early in one data project, a talented data scientist wanted to apply image processing to extract numbers from charts and graphs. It was technically impressive and entirely unnecessary — we already had the underlying data those charts were drawn from. The expert move wasn't the fancier AI. It was knowing not to reach for it.</p>
+
+      <p>I've built that same restraint into my own work. In the climate-risk platform I've developed, I deliberately <em>reduced</em> the role of the language model — replacing generative steps with deterministic calculations wherever precision matters. The result is exact, repeatable answers every time, far lower cost, and no room for hallucination in the numbers that have to be right. Knowing where AI adds value and where it introduces risk is the entire game, and often the most sophisticated choice is to use AI for less, not more.</p>
+
+      <p>And sometimes AI simply collapses "hard" into "fast." On one product, the engineering team estimated that a feature would be difficult and slow to build. I described the problem to an AI model, got working code back, and handed it over for production. The capability is real, and it's astonishing — <em>when someone knows precisely what to ask for and how to judge what comes back.</em></p>
+
+      <h2>But is it a bubble?</h2>
+
+      <p>It's the question every executive is quietly asking, so let me answer it directly.</p>
+
+      <p>Maybe. But it almost doesn't matter, and here's why.</p>
+
+      <p>Even if AI <em>is</em> in a bubble, the underlying capability is real — and real capability outlives bubbles. The internet was unmistakably a bubble in 2000, and the bubble burst spectacularly. But the technology was real, and it went on to reshape essentially everything. Anyone who concluded from the crash that the internet was a fad made one of the worst strategic calls of their career. Betting against a real capability because its valuation got ahead of itself is a mistake history punishes.</p>
+
+      <p>But here's the sharper point: AI may never be a proper bubble at all. A bubble is what happens when <em>enthusiasm outpaces capability</em> — when the hype runs ahead of what the thing can actually do. With AI, capability itself keeps climbing, and unusually, the limiting factor isn't human talent. It's chips, infrastructure, and energy — physical constraints that enormous amounts of capital and effort are actively working to remove. As long as those constraints keep yielding, the capability keeps growing, and enthusiasm has a hard time outpacing a thing that genuinely keeps getting more capable.</p>
+
+      <p>So whether or not there's a bubble in the valuations, the capability is real and it's compounding. For an established business, the strategic implication is the same either way: this is not a fad to wait out. It's a shift to get in front of — carefully, on your own terms, applied to your moat.</p>
+
+      <h2>So what should you actually do?</h2>
+
+      <p>If you've read this far, you already have the shape of the answer. AI is real and powerful. The failures are predictable and expensive. And the difference between the two comes down to judgment — knowing what to build, what to buy, what to leave alone, where the technology is reliable, where it's selling past its limits, and where a human has to stay in the loop.</p>
+
+      <p>But honestly, the more interesting question to me isn't the general one. It's yours.</p>
+
+      <div class="close-band reveal">
+        <p>Every established business with a real moat is sitting on a different version of this problem — different data, different expertise, different place where AI either compounds the advantage or quietly threatens it. The patterns repeat, but the specifics never do, and the specifics are where it actually gets decided.</p>
+        <p>So if any of this resonated, I'd genuinely like to hear your version of it. Where do you think AI fits in what you've built? Where are you tempted, and where are you nervous?</p>
+        <p>I've spent years on both sides of this — building these systems and cleaning up after the ones built for the wrong reasons — and I find these conversations genuinely interesting, wherever they lead. If you'd like to think it through together, I'm always glad to talk.</p>
+        <div class="mailrow">
+          <a class="mailbtn" href="mailto:vahid@skewrisk.com?subject=Your%20AI%20piece%20%E2%80%94%20let's%20talk">vahid@skewrisk.com</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</article>
+
+<footer>
+  <div class="wrap foot">
+    <p>© <span id="yr"></span> SkewRisk</p>
+    <p><a href="index.html">skewrisk.com</a> · <a href="mailto:vahid@skewrisk.com">vahid@skewrisk.com</a></p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+</script>
+
+</body>
+</html>
